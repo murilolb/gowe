@@ -1,0 +1,42 @@
+version: '2'
+services: 
+  abastecimento:
+    build: ./web
+    ports:
+     - "8081:80"
+    volumes:
+     - ./web/abastecimento.gowe.com.br/var/www/html:/var/www/html
+     - ./web/abastecimento.gowe.com.br/var/www/cgi-local:/var/www/cgi-local
+     - ./web/abastecimento.gowe.com.br/var/log/httpd:/var/log/httpd
+    environment:
+      DB_HOST: mysql:3306
+      DB_USER: root
+      DB_PASSWORD: ''
+      DB_DATABASE: banco
+      REDIS: redis
+      #    hostname: abastecimento.gowe.com.br
+    links:
+     - mysql
+     - redis
+  nginx:
+    build: ./nginx
+    ports:
+     - "8080:80"
+    volumes:
+     - ./redis/etc/nginx/conf.d:/etc/nginx/conf.d
+    links:
+     - abastecimento
+  redis: 
+    build: ./redis
+    ports:
+     - "6379:6379"
+    volumes:
+     - ./redis/var/lib/redis:/var/lib/redis
+  mysql:
+    build: ./mysql
+    ports:
+     - "3307:3306"
+    volumes:
+     - ./mysql/var/lib/mysql:/var/lib/mysql
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
